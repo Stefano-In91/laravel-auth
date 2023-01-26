@@ -15,16 +15,22 @@ use App\Http\Controllers\Admin\ProjectController;
 |
 */
 
+
+// Rotte Pubbliche
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Rotte protette da autenticazione
+// Prefisso settato come admin -> con name do nome che inizia con admin. (artisan route:list)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function() {
-        return view('admin.dashboard');
-    })->name('dashboard');
 
-    Route::resource('projects', ProjectController::class);
+    Route::get('/dashboard', function() {
+        return view('admin.dashboard'); //qui admin.dashboard è il nome della cartella non della rotta
+    })->name('dashboard');// <-- Modificare home in RouteServiceProvider come /admin/dashboard
+
+    Route::resource('projects', ProjectController::class)->parameters(['projects' => 'project:slug']);
 });
 
+// Rotte prefisse autenticazione
 require __DIR__.'/auth.php';

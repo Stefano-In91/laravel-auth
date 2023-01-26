@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
@@ -17,7 +20,7 @@ class ProjectController extends Controller
     {
         $projects = Project::all();
 
-        return view('admin.projects', compact('projects'));
+        return view('admin.projects.index', compact('projects'));
     }
 
     /**
@@ -26,8 +29,8 @@ class ProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('admin.create');//
+    {        
+        return view('admin.projects.create');
     }
 
     /**
@@ -36,9 +39,16 @@ class ProjectController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
-        return redirect()->route('admin.projects');
+        $data = $request->validated();
+
+        $new_project = new Project();
+        $new_project->fill($data);
+        $new_project->slug = Str::slug($new_project->title);
+        $new_project->save();
+
+        return redirect()->route('admin.projects.index')->with('message', 'Progetto aggiunto con successo');
     }
 
     /**
@@ -49,6 +59,8 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+
+        return view('admin.projects.show', compact('project'));
     }
 
     /**
@@ -57,9 +69,9 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Project $project)
     {
-        //
+        return view('admin.projects.edit', compact('project'));
     }
 
     /**
@@ -69,9 +81,15 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        $data = $request->validated();
+
+        $project->update($data);
+        $project->slug = Str::slug($project->title);
+        $project->save();
+
+        return redirect()->route('admin.projects.index')->with('message', 'Progetto aggiornato con successo');
     }
 
     /**
@@ -80,8 +98,10 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $project)
     {
-        //
+        $project->delete();
+
+        return redirect()->route('admin.projects.index')->with('message', 'Progetto eliminato con successo');
     }
 }
