@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use Illuminate\Support\Str;
@@ -43,9 +44,16 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
 
+        
         $new_project = new Project();
         $new_project->fill($data);
         $new_project->slug = Str::slug($new_project->title);
+        
+        if( isset($data['cover_image']) ) {            
+            $img_path = Storage::disk('public')->put('uploads', $data['cover_image']);
+            $new_project->cover_image = $img_path;
+        }
+
         $new_project->save();
 
         return redirect()->route('admin.projects.index')->with('message', 'Progetto aggiunto con successo');
@@ -85,7 +93,12 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
 
-        $project->update($data);
+        if( isset($data['cover_image']) ) {   
+            $img_path = Storage::disk('public')->put('uploads', $data['cover_image']);
+            $data->cover_image = $img_path;
+        }
+
+        $project->update($data);        
         $project->slug = Str::slug($project->title);
         $project->save();
 
@@ -100,6 +113,10 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if( $project->cover_image ) {
+            Storage::disk('public')->delete($project->cover_image);
+        }
+
         $project->delete();
 
         return redirect()->route('admin.projects.index')->with('message', 'Progetto eliminato con successo');

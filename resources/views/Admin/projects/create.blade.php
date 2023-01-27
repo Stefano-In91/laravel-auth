@@ -11,7 +11,7 @@
       </ul>
     </div>
   @endif
-  <form action="{{ route('admin.projects.store') }}" method="POST">
+  <form action="{{ route('admin.projects.store') }}" method="POST" enctype="multipart/form-data">
 
     @csrf
 
@@ -25,6 +25,12 @@
       <label for="description" class="form-label">Descrizione</label>
       <input type="text" class="form-control @error('description') alert alert-danger @enderror"
         id="description" name="description" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="cover_image" class="form-label">Immagine</label>
+      <input type="file" class="form-control @error('cover_image') alert alert-danger @enderror"
+        id="cover_image" name="cover_image">
     </div>
 
     <button type="submit" class="btn btn-primary">Salva</button>
